@@ -29,7 +29,6 @@ class EditCanvas(Canvas):
         self.news = True
         self.law = core.Law([])
         self.initRef()
-##        self.testInit()
     def update(self):
         # 更新law
         self.news = True
@@ -83,17 +82,6 @@ class EditCanvas(Canvas):
             self.ref = GVector([GPoint(ct - w * 0.5 * M), GPoint(ct + w * 0.5 * M)])
             self.addGPoint(self.ref.gpoints[0])
             self.addGPoint(self.ref.gpoints[1])
-        # 此处不能直接添加ref为Canvas的gvector，因为这会导致作为通常的规则参与渲染
-##    def testInit(self):
-##        w, h = SIZE
-##        M = self.M
-##        l = w * M
-##        c = self.ref.devide(0.4)
-##        d = GPoint(c.pos - l * 0.4j)
-##        e = GPoint(c.pos + l * 0.3j)
-##        gppairs = [(self.ref[0], c), (c, self.ref[1]), (c, d), (c, e)]
-##        for gppair in gppairs:
-##            self.addGVector(GVector(gppair))
     def gridAdhere(self):
         #（如果足够近，则）将self.clicked的坐标附着到最近的网格点上
         N = self.GRID_N
@@ -159,7 +147,7 @@ class EditCanvas(Canvas):
                         for gvector in list(gpoint.gvectors):
                             gvector.replace(gpoint, self.clicked)
                         self.removeGPoint(gpoint)
-                        break # 注意这里的break是不可以去除的，否则会出现多点同时合并的情形，可能导致位置相近的同向量端点被合并
+                        break
         self.clicked = None
     def keyDown(self, key):
         if key == pg.K_RETURN:
@@ -168,10 +156,6 @@ class EffectCanvas(Canvas):
     N = 7 # 动画帧数
     def __init__(self):
         self.vectors = []
-        
-        
-##        self.ratio = 0.75
-##        self.ref = np.array([w * 0.125 + h * 0.5j, w * 0.875 + h * 0.5j])
         self.law = None
         self.surfaces = [pg.Surface(SIZE) for i in range(self.N)] # 动画的单个循环中的帧
         self.resetRatio(0.75)
@@ -183,39 +167,26 @@ class EffectCanvas(Canvas):
         self.ratio = ratio
         w, h = SIZE
         self.ref = np.array([w * 0.5 * (1 - ratio) + h * 0.5j, w * 0.5 * (1 + ratio) + h * 0.5j])
-        self.refresh() ##
+        self.refresh()
     @property
     def surface(self):
         return self.surfaces[self.cnt]
     def wander(self):
         if editCanvas.law.ops:
-##        if self.law.ops:
             i = random.randint(0, self.N - 1)
-            # test
             t = float(i) / self.N
             ref = (t * self.aop + (1 - t) * np.eye(2))  @ self.ref
-            # 暂时没有好方法来填充，就先不改，怕影响正常功能
-##            v = self.law.randomIterate(ref)
             v = editCanvas.law.randomIterate(ref)
             prim(self.surfaces[i], WHITE, v)
-##    def updateLaw(self):
-##        self.law = core.Law([gvector.vector() for gvector in editCanvas.gvectors], editCanvas.ref.vector())
-##        if self.law.ops:
-##            self.aop = np.linalg.inv(self.law.ops[0])
-##        editCanvas.news = False
-##        for surface in self.surfaces:
-##            surface.fill(BLACK)
     def refresh(self):
         editCanvas.news = False
         for surface in self.surfaces:
             surface.fill(BLACK)
     def draw(self):
-##        # 及时更新规则
         if editCanvas.news:
             self.refresh()
         if editCanvas.law.ops:
             self.aop = np.linalg.inv(editCanvas.law.ops[0])
-##            self.updateLaw()
         # 均匀随机更新
         for i in range(100):
             self.wander()
