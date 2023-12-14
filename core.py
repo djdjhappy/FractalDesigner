@@ -27,13 +27,10 @@ class Law:
         self.ops = [op(self.sup, sub) for sub in self.subs]
 
     def apply(self, vectors, pl = 3, pr = 1000):
-        #pl, pr是上下精确度，超出此范围的长度的分形不会再进行迭代
+        # pl, pr是上下精确度，超出此范围的长度的分形不会再进行迭代
         res = [op @ v if pl < norm(v) < pr else v for op in self.ops for v in vectors]
         return res
-    # 绘图顺序的改进可以写入论文，充实其内容
-
     def randomIterate(self, v, m = 15):
-        # 效率不够，还是要考虑如何利用矩阵乘法
         for i in range(m):
             v = random.choice(self.ops) @ v
             n = norm(v)
